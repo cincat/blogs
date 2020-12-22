@@ -569,13 +569,13 @@ public static void loadArgArray(final InsnList instructions, MethodNode methodNo
 
 我们看下JVM Opcode Reference对`anewarray`指令的解释:
 
->> Description: allocate a new array of objects
->>
->> Stack:
->> | before |   after   |
->> | :----: | :-------: |
->> |  size  | array ref |
->> | other  |   other   |
+> Description: allocate a new array of objects
+>
+> Stack:
+> | before |   after   |
+> | :----: | :-------: |
+> |  size  | array ref |
+> | other  |   other   |
 
 这个指令比较好理解，就是将栈顶的 size取出，作为新建数组的长度，在本地变量表中创建一个数组的引用，然后压栈，对比上面方法中for循环前面的代码，是完全吻合的。
 
