@@ -129,7 +129,7 @@ public static void run(String[] args) {
 
 运行这个方法的 JVM 通过名称匹配目标 JVM，然后通过`attach`方法与目标 JVM 取得联系，继而对目标 JVM 发出指令，让其挂载插装`agent`，整个过程如下图所示：
 
-![](https://mmbiz.qpic.cn/mmbiz_svg/Xmnun9Io49QRjtQwaKpnWV7FrG5lDj9dExz5A1pSsHZtmu8sxVVkxlhsMLMVTJWXXxFhEOYG0zWw6qiaASWOzW3owS2nwQAGc/640?wx_fmt=svg)
+![image-20201222235602744](https://gitee.com/cincat/picgo/raw/master/img/image-20201222235602744.png)
 
 在我们反复提的 agent 里，我们才真正做代码插装的工作，`attach API`中要求，被目标代码挂载的`agent`包必须实现`agentmain` 且在打包的 MANIFEST.MF 中指定 Agent-Class 属性，完整的 MANIFEST.MF 文件如下所示：
 
@@ -239,12 +239,12 @@ public byte[] transform(ClassLoader loader, String className, Class<?> classBein
 
 有了JVM的支持，我们实现一个简单的watch命令也不难，只需要在目标方法的前后插入时间语句就可以了，目标JVM在attach了我们的agent后会输出本次调用的时间，如下图所示：
 
-![img](https://gitee.com/cincat/picgo/raw/master/img/7e69ff846b355e51f3a9e5563523fa98.png)![点击并拖拽以移动](data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==)
+![img](https://gitee.com/cincat/picgo/raw/master/img/7e69ff846b355e51f3a9e5563523fa98.png)
 
 ## JVM Attach 机制的实现
 
 在前面的例子里我们之所以可以在一个 JVM 中发送指令让另一个 JVM 加载 Agent，是因为 JVM 通过 Attach 机制提供了一种进程间通信的方式，http://lovestblog.cn/blog/2014/06/18/jvm-attach/\?spm=ata.13261165.0.0.26d52428n8NoAy 详细的讲述了 Attach 机制是如何在 Linux 平台下实现的，结合我们之前的例子，可以把整个过程总结为如下的一张图：
 
-![](https://mmbiz.qpic.cn/mmbiz_svg/Xmnun9Io49QRjtQwaKpnWV7FrG5lDj9dPxgfibrfx4mOwo49Zx2yM0YqGqiaS4ayL69eypVxnHd7W4FZOkTib5wMMiaqjFp3jlvJ/640?wx_fmt=svg)
+![image-20201222235637223](https://gitee.com/cincat/picgo/raw/master/img/image-20201222235637223.png)
 
 在 GVM 调用`attach`的时候如果发现没有`java_pid`这个文件，则开始启动`attach`机制，首先会创建一个`attach_pid`的文件，这个文件的主要作用是用来鉴权。然后向`Signal Dispacher`发送`BREAK`信号，之后就一直在轮询等待`java_pid`这个套接字。`Signal Dispacher`中注册的信号处理器`Attach Listener`中首先会校验`attach_pid`这个文件的 uid 是否和当前 uid 一致，鉴权通过后才会创建`attach_pid`建立通信通道。
